@@ -1,1 +1,104 @@
+// Motor 1 - BTS7960-1
+int R_IS2 = 13;
+int R_EN2 = 2;
+int R_PWM2 = 9;
+int L_IS2 = 4;
+int L_EN2 = 5;
+int L_PWM2 = 10; //356911
+
+// Motor 2 - BTS7960-2
+int R_IS1 = 7;
+int R_EN1 = 8;
+int R_PWM1 = 3;
+int L_IS1 = 12;
+int L_EN1 = 11;
+int L_PWM1 = 6;
+
+int motorSpeed = 255;
+
+void setup() {
+  Serial.begin(9600);
+  // Initialize BTS7960 for Motor 1
+  pinMode(R_IS1, OUTPUT);
+  pinMode(R_EN1, OUTPUT);
+  pinMode(R_PWM1, OUTPUT);
+  pinMode(L_IS1, OUTPUT);
+  pinMode(L_EN1, OUTPUT);
+  pinMode(L_PWM1, OUTPUT);
+  digitalWrite(R_IS1, LOW);
+  digitalWrite(L_IS1, LOW);
+  digitalWrite(R_EN1, HIGH);
+  digitalWrite(L_EN1, HIGH);
+
+  // Initialize BTS7960 for Motor 2
+  pinMode(R_IS2, OUTPUT);
+  pinMode(R_EN2, OUTPUT);
+  pinMode(R_PWM2, OUTPUT);
+  pinMode(L_IS2, OUTPUT);
+  pinMode(L_EN2, OUTPUT);
+  pinMode(L_PWM2, OUTPUT);
+  digitalWrite(R_IS2, LOW);
+  digitalWrite(L_IS2, LOW);
+  digitalWrite(R_EN2, HIGH);
+  digitalWrite(L_EN2, HIGH);
+}
+
+void loop() {
+  if (Serial.available()>0) {
+    char value = Serial.read();
+
+    if (value == 'F') {
+      forward();
+    } else if (value == 'B') {
+      backward();
+    } else if (value == 'L') {
+      left();
+    } else if (value == 'R') {
+      right();
+    } 
+  }
+  else {
+    stop();
+  }
+}
+
+void forward() {
+  Serial.println("Moving forward");
+  analogWrite(R_PWM1, 0);
+  analogWrite(L_PWM1, motorSpeed);
+  analogWrite(R_PWM2, motorSpeed);
+  analogWrite(L_PWM2, 0);
+}
+
+void backward() {
+  Serial.println("Moving backward");
+  analogWrite(R_PWM1, motorSpeed);
+  analogWrite(L_PWM1, 0);
+  analogWrite(R_PWM2, 0);
+  analogWrite(L_PWM2, motorSpeed);
+}
+
+void left() {
+  Serial.println("Turning left");
+  analogWrite(R_PWM1, motorSpeed);
+  analogWrite(L_PWM1, 0);
+  analogWrite(R_PWM2, motorSpeed);
+  analogWrite(L_PWM2, 0);
+}
+
+void right() {
+  Serial.println("Turning right");
+  analogWrite(R_PWM1, 0);
+  analogWrite(L_PWM1, motorSpeed);
+  analogWrite(R_PWM2, 0);
+  analogWrite(L_PWM2, motorSpeed);
+}
+
+void stop() {
+  Serial.println("stopping");
+  analogWrite(R_PWM1, 0);
+  analogWrite(L_PWM1, 0);
+  analogWrite(R_PWM2, 0);
+  analogWrite(L_PWM2, 0);
+}
 
