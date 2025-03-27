@@ -1,8 +1,8 @@
 // Motor 1 - BTS7960-1
-int R_IS2 = 13;
+int R_IS2 = 4;
 int R_EN2 = 2;
 int R_PWM2 = 9;
-int L_IS2 = 4;
+int L_IS2 = 13;
 int L_EN2 = 5;
 int L_PWM2 = 10; //356911
 
@@ -15,6 +15,7 @@ int L_EN1 = 11;
 int L_PWM1 = 6;
 
 int motorSpeed = 255;
+int turningSpeed = 255;
 
 void setup() {
   Serial.begin(9600);
@@ -64,34 +65,34 @@ void loop() {
 
 void forward() {
   Serial.println("Moving forward");
-  analogWrite(R_PWM1, 0);
-  analogWrite(L_PWM1, motorSpeed);
+  analogWrite(R_PWM1, motorSpeed);
+  analogWrite(L_PWM1, 0);
   analogWrite(R_PWM2, motorSpeed);
   analogWrite(L_PWM2, 0);
 }
 
 void backward() {
   Serial.println("Moving backward");
-  analogWrite(R_PWM1, motorSpeed);
-  analogWrite(L_PWM1, 0);
+  analogWrite(R_PWM1, 0);
+  analogWrite(L_PWM1, motorSpeed);
   analogWrite(R_PWM2, 0);
   analogWrite(L_PWM2, motorSpeed);
 }
 
 void left() {
   Serial.println("Turning left");
-  analogWrite(R_PWM1, motorSpeed);
-  analogWrite(L_PWM1, 0);
+  analogWrite(R_PWM1, 0);
+  analogWrite(L_PWM1, turningSpeed);
   analogWrite(R_PWM2, motorSpeed);
   analogWrite(L_PWM2, 0);
 }
 
 void right() {
   Serial.println("Turning right");
-  analogWrite(R_PWM1, 0);
-  analogWrite(L_PWM1, motorSpeed);
+  analogWrite(R_PWM1, motorSpeed);
+  analogWrite(L_PWM1, 0 );
   analogWrite(R_PWM2, 0);
-  analogWrite(L_PWM2, motorSpeed);
+  analogWrite(L_PWM2, turningSpeed);
 }
 
 void stop() {
@@ -101,4 +102,5 @@ void stop() {
   analogWrite(R_PWM2, 0);
   analogWrite(L_PWM2, 0);
 }
+
 
