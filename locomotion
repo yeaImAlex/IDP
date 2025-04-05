@@ -1,106 +1,102 @@
-// Motor 1 - BTS7960-1
-int R_IS2 = 4;
-int R_EN2 = 2;
-int R_PWM2 = 9;
-int L_IS2 = 13;
-int L_EN2 = 5;
-int L_PWM2 = 10; //356911
+from gpiozero import PWMOutputDevice, DigitalOutputDevice
+from time import sleep
 
-// Motor 2 - BTS7960-2
-int R_IS1 = 7;
-int R_EN1 = 8;
-int R_PWM1 = 3;
-int L_IS1 = 12;
-int L_EN1 = 11;
-int L_PWM1 = 6;
+class MotorControl:
+    def __init__(self,
+                 L_PWM=12, R_PWM=16, L_EN=27, R_EN=17,
+                 L2_PWM=21, R2_PWM=19, L2_EN=26, R2_EN=13):
 
-int motorSpeed = 255;
-int turningSpeed = 255;
+        # === Motor 1 (Left Motor) ===
+        self.left_pwm = PWMOutputDevice(L_PWM, frequency=1000)
+        self.right_pwm = PWMOutputDevice(R_PWM, frequency=1000)
+        self.left_en = DigitalOutputDevice(L_EN)
+        self.right_en = DigitalOutputDevice(R_EN)
 
-void setup() {
-  Serial.begin(9600);
-  // Initialize BTS7960 for Motor 1
-  pinMode(R_IS1, OUTPUT);
-  pinMode(R_EN1, OUTPUT);
-  pinMode(R_PWM1, OUTPUT);
-  pinMode(L_IS1, OUTPUT);
-  pinMode(L_EN1, OUTPUT);
-  pinMode(L_PWM1, OUTPUT);
-  digitalWrite(R_IS1, LOW);
-  digitalWrite(L_IS1, LOW);
-  digitalWrite(R_EN1, HIGH);
-  digitalWrite(L_EN1, HIGH);
+        # === Motor 2 (Right Motor) ===
+        self.left2_pwm = PWMOutputDevice(L2_PWM, frequency=1000)
+        self.right2_pwm = PWMOutputDevice(R2_PWM, frequency=1000)
+        self.left2_en = DigitalOutputDevice(L2_EN)
+        self.right2_en = DigitalOutputDevice(R2_EN)
 
-  // Initialize BTS7960 for Motor 2
-  pinMode(R_IS2, OUTPUT);
-  pinMode(R_EN2, OUTPUT);
-  pinMode(R_PWM2, OUTPUT);
-  pinMode(L_IS2, OUTPUT);
-  pinMode(L_EN2, OUTPUT);
-  pinMode(L_PWM2, OUTPUT);
-  digitalWrite(R_IS2, LOW);
-  digitalWrite(L_IS2, LOW);
-  digitalWrite(R_EN2, HIGH);
-  digitalWrite(L_EN2, HIGH);
-}
+        # Enable all motor drivers
+        self.left_en.on()
+        self.right_en.on()
+        self.left2_en.on()
+        self.right2_en.on()
 
-void loop() {
-  if (Serial.available()>0) {
-    char value = Serial.read();
+    def move_forward(self, speed=1):
+        self.left_pwm.value = speed
+        self.right_pwm.value = 0
+        self.left2_pwm.value = speed
+        self.right2_pwm.value = 0
+        # print("Moving Forward")
 
-    if (value == 'F') {
-      forward();
-    } else if (value == 'B') {
-      backward();
-    } else if (value == 'L') {
-      left();
-    } else if (value == 'R') {
-      right();
-    } 
-  }
-  else {
-    stop();
-  }
-}
+    def move_backward(self, speed=1):
+        self.left_pwm.value = 0
+        self.right_pwm.value = speed
+        self.left2_pwm.value = 0
+        self.right2_pwm.value = speed
+        print("Moving Backward")
 
-void forward() {
-  Serial.println("Moving forward");
-  analogWrite(R_PWM1, motorSpeed);
-  analogWrite(L_PWM1, 0);
-  analogWrite(R_PWM2, motorSpeed);
-  analogWrite(L_PWM2, 0);
-}
+    def turn_left(self, speed=1):
+        self.left_pwm.value = 0
+        self.right_pwm.value = speed
+        self.left2_pwm.value = speed
+        self.right2_pwm.value = 0
+        print("Turning Left")
 
-void backward() {
-  Serial.println("Moving backward");
-  analogWrite(R_PWM1, 0);
-  analogWrite(L_PWM1, motorSpeed);
-  analogWrite(R_PWM2, 0);
-  analogWrite(L_PWM2, motorSpeed);
-}
+    def turn_right(self, speed=1):
+        self.left_pwm.value = speed
+        self.right_pwm.value = 0
+        self.left2_pwm.value = 0
+        self.right2_pwm.value = speed
+        print("Turning Right")
 
-void left() {
-  Serial.println("Turning left");
-  analogWrite(R_PWM1, 0);
-  analogWrite(L_PWM1, turningSpeed);
-  analogWrite(R_PWM2, motorSpeed);
-  analogWrite(L_PWM2, 0);
-}
+    def stop_motor(self):
+        self.left_pwm.value = 0
+        self.right_pwm.value = 0
+        self.left2_pwm.value = 0
+        self.right2_pwm.value = 0
+        # print("Motor Stopped")
 
-void right() {
-  Serial.println("Turning right");
-  analogWrite(R_PWM1, motorSpeed);
-  analogWrite(L_PWM1, 0 );
-  analogWrite(R_PWM2, 0);
-  analogWrite(L_PWM2, turningSpeed);
-}
+    def cleanup(self):
+        self.stop_motor()
+        self.left_en.off()
+        self.right_en.off()
+        self.left2_en.off()
+        self.right2_en.off()
 
-void stop() {
-  Serial.println("stopping");
-  analogWrite(R_PWM1, 0);
-  analogWrite(L_PWM1, 0);
-  analogWrite(R_PWM2, 0);
-  analogWrite(L_PWM2, 0);
-}
+
+# ====== Test Motor Control ======
+if __name__ == '__main__':
+    motor = MotorControl()
+
+    try:
+        print("Testing motor control...")
+
+        motor.move_forward(0.7)
+        sleep(2)
+
+        motor.stop_motor()
+        sleep(1)
+
+        motor.move_backward(0.7)
+        sleep(2)
+
+        motor.stop_motor()
+        sleep(1)
+
+        motor.turn_left()
+        sleep(2)
+
+        motor.turn_right()
+        sleep(2)
+
+    except KeyboardInterrupt:
+        print("Interrupted by user")
+
+    finally:
+        motor.cleanup()
+
 
 
