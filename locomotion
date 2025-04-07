@@ -1,22 +1,18 @@
 from gpiozero import PWMOutputDevice, DigitalOutputDevice
+from gpiozero.pins.lgpio import LGPIOFactory
 from time import sleep
 
 class MotorControl:
-    def __init__(self,
-                 L_PWM=12, R_PWM=16, L_EN=27, R_EN=17,
-                 L2_PWM=21, R2_PWM=19, L2_EN=26, R2_EN=13):
-
-        # === Motor 1 (Left Motor) ===
-        self.left_pwm = PWMOutputDevice(L_PWM, frequency=1000)
-        self.right_pwm = PWMOutputDevice(R_PWM, frequency=1000)
-        self.left_en = DigitalOutputDevice(L_EN)
-        self.right_en = DigitalOutputDevice(R_EN)
-
-        # === Motor 2 (Right Motor) ===
-        self.left2_pwm = PWMOutputDevice(L2_PWM, frequency=1000)
-        self.right2_pwm = PWMOutputDevice(R2_PWM, frequency=1000)
-        self.left2_en = DigitalOutputDevice(L2_EN)
-        self.right2_en = DigitalOutputDevice(R2_EN)
+    def __init__(self, L_PWM=12, R_PWM=16, L_EN=27, R_EN=17, L2_PWM=21, R2_PWM=19, L2_EN=26, R2_EN=13):
+        factory = LGPIOFactory()
+        self.left_pwm = PWMOutputDevice(L_PWM, pin_factory=factory, frequency=1000)
+        self.right_pwm = PWMOutputDevice(R_PWM, pin_factory=factory, frequency=1000)
+        self.left_en = DigitalOutputDevice(L_EN, pin_factory=factory)
+        self.right_en = DigitalOutputDevice(R_EN, pin_factory=factory)
+        self.left2_pwm = PWMOutputDevice(L2_PWM, pin_factory=factory, frequency=1000)
+        self.right2_pwm = PWMOutputDevice(R2_PWM, pin_factory=factory, frequency=1000)
+        self.left2_en = DigitalOutputDevice(L2_EN, pin_factory=factory)
+        self.right2_en = DigitalOutputDevice(R2_EN, pin_factory=factory)
 
         # Enable all motor drivers
         self.left_en.on()
@@ -25,31 +21,31 @@ class MotorControl:
         self.right2_en.on()
 
     def move_forward(self, speed=1):
-        self.left_pwm.value = speed
-        self.right_pwm.value = 0
-        self.left2_pwm.value = speed
-        self.right2_pwm.value = 0
+        self.left_pwm.value = 0
+        self.right_pwm.value = speed
+        self.left2_pwm.value = 0
+        self.right2_pwm.value = speed
         # print("Moving Forward")
 
     def move_backward(self, speed=1):
-        self.left_pwm.value = 0
-        self.right_pwm.value = speed
-        self.left2_pwm.value = 0
-        self.right2_pwm.value = speed
+        self.left_pwm.value = speed
+        self.right_pwm.value = 0
+        self.left2_pwm.value = speed
+        self.right2_pwm.value = 0
         print("Moving Backward")
 
     def turn_left(self, speed=1):
-        self.left_pwm.value = 0
-        self.right_pwm.value = speed
-        self.left2_pwm.value = speed
-        self.right2_pwm.value = 0
-        print("Turning Left")
-
-    def turn_right(self, speed=1):
         self.left_pwm.value = speed
         self.right_pwm.value = 0
         self.left2_pwm.value = 0
         self.right2_pwm.value = speed
+        print("Turning Left")
+
+    def turn_right(self, speed=1):
+        self.left_pwm.value = 0
+        self.right_pwm.value = speed
+        self.left2_pwm.value = speed
+        self.right2_pwm.value = 0
         print("Turning Right")
 
     def stop_motor(self):
@@ -97,6 +93,3 @@ if __name__ == '__main__':
 
     finally:
         motor.cleanup()
-
-
-
